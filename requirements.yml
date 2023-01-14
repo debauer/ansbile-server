@@ -1,0 +1,21 @@
+# from GitHub, overriding the name and specifying a specific tag
+roles:
+  - src: https://github.com/nickjj/ansible-docker
+    name: common/ansible-docker
+    
+  - src: https://github.com/debauer/ansible-grafana
+    name: monitoring/ansible-grafana
+
+  - src: https://github.com/debauer/ansible-role-borgbackup
+    name: backup/ansible-borg
+    version: multiple-configs-and-crons
+
+  - src: https://github.com/morbidick/ansible-role-nginx-vhosts
+    name: web/ansible-nginx
+
+  - src: https://github.com/debauer/ansible-ssmtp
+    name: basic/ansible-ssmtp
+
+
+  - src: https://github.com/geerlingguy/ansible-role-certbot
+    name: mail/certbot

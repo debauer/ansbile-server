@@ -1,0 +1,48 @@
+---
+- name: APT Packages
+  block:
+    - name: Update and upgrade apt packages
+      apt:
+        update_cache: yes
+        upgrade: "{{ apt_upgrade }}"
+        autoremove: yes
+      when: ansible_pkg_mgr == 'apt'
+
+    - name: Remove base packages
+      package:
+        name: "{{ apt_remove }}"
+        state: absent
+
+    - name: Install common packages
+      package:
+        name: "{{ apt_common }}"
+        state: present
+      when: apt_install_common
+
+    - name: Install additinal packages
+      package:
+        name: "{{ apt_additional }}"
+        state: present
+  when:
+    - ansible_facts['os_family'] == "Debian" or ansible_facts['os_family'] == "Ubuntu"
+
+- name: PIP Packages
+  block:
+    - name: install general pip dependencies
+      become: yes
+      become_user: '{{ item }}'
+      pip:
+        name: "{{ pip_for_users + pip_for_user_additional }}"
+        state: present
+        executable: /usr/bin/pip3
+      with_items: "{{ users }}"
+
+    - name: install general pip dependencies for default python3
+      become: yes
+      become_user: 'root'
+      pip:
+        name: "{{ pip_for_root + pip_for_root_additional }}"
+        state: present
+        executable: /usr/bin/pip3
+      with_items: "{{ users }}"
+  when: pip_install

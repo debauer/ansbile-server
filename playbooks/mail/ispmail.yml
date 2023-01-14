@@ -1,0 +1,50 @@
+---
+- hosts: mail
+  tasks:
+    - name: Set certbot_certs variable
+      set_fact:
+        certbot_certs:
+          - email: "postmaster@{{ispmail_fqdn}}"
+            domains:
+              - "{{ispmail_fqdn}}"
+  
+- hosts: mail
+  vars_files:
+    - ../../vars/secrets.yml
+  roles:
+    - role: roles/mail/ispmail-packages
+      tags: packages
+    - role: roles/mail/certbot
+      tags: certbot
+    - role: roles/mail/ispmail-database
+      tags: database
+    - role: roles/mail/ispmail-postfix
+      tags: postfix
+    - role: roles/mail/ispmail-dovecot
+      tags: dovecot
+    - role: roles/mail/ispmail-webmail-apache-roundcube
+      tags: roundcube
+    - role: roles/mail/ispmail-rspamd
+      tags: rspamd
+  vars:
+    - ispmail_populate_test_data: true
+    - certbot_create_if_missing: true
+    - certbot_create_standalone_stop_services:
+        - apache2
+        - dovecot
+        - postfix
+
+- hosts: mail
+  tags: always
+  vars_files:
+    - ../../vars/secrets.yml
+  tasks:
+    - debug:
+        msg:
+          - "Installation complete."
+          - ""
+          - "Web mail URL:            https://{{ispmail_fqdn}}/"
+          - "Example email user:      john@{{ispmail_fqdn}}"
+          - "Example email password:  summersun"
+          - "Rspamd admin URL:        https://{{ispmail_fqdn}}/rspamd"
+          - "Rspamd admin password:   {{ispmail_rspamd_web_password}}"

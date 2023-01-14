@@ -1,0 +1,39 @@
+---
+
+- name: Ensure group "somegroup" exists
+  group:
+    name: '{{ item }}'
+    state: present
+  with_items: '{{ user_default_groups + user_groups }}'
+
+- name: Add the user with a bash shell
+  user:
+    name: '{{ user }}'
+    shell: /bin/bash
+    groups: '{{ user_default_groups + user_groups }}'
+    append: yes
+
+- name: make dir .ssh
+  file:
+    path: /home/{{ user }}/.ssh
+    state: directory
+    owner: '{{ user }}'
+    group: '{{ user }}'
+    mode: '0755'
+  
+- name: set correct paths
+  set_fact:
+    ssh_public_key_files_paths: "{{ ssh_public_key_files_paths }} + ['../../../files/public_keys/{{ item }}']"
+  with_items: "{{ ssh_public_key_files }}"
+  vars:
+    ssh_public_key_files_paths: []
+
+- name: Set up ssh keys for user '{{ user }}'
+  authorized_key:
+    user: '{{ user }}'
+    state: present
+    key: '{{ loop_file }}'
+  with_file: '{{ ssh_public_key_files_paths }}'
+  loop_control:
+    loop_var: loop_file
+  when: '{{ copy_keys }}'

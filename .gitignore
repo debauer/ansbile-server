@@ -1,0 +1,4 @@
+roles/*/ansible-*
+roles/ansible-*
+.idea
+.vault_pass

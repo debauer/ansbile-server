@@ -1,0 +1,15 @@
+---
+- hosts: mail
+  become: yes
+  vars_files:
+    - ../vars/secrets.yml
+
+  roles:
+    - role: roles/basic/users
+      vars:
+        - restart_ssh: no
+    - role: roles/basic/packages
+      vars:
+        - apt_install_common: true
+
+- import_playbook: mail/ispmail.yml
